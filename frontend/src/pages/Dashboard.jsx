@@ -28,6 +28,153 @@ const priorityClasses = {
   urgent: 'bg-red-100 text-red-700',
 };
 
+/* ============================================================
+   Dashboard Skeleton
+============================================================ */
+
+function DashboardSkeleton() {
+  return (
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6 animate-pulse">
+
+      {/* Header */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="space-y-2">
+          <div className="h-7 w-32 rounded bg-gray-200" />
+          <div className="h-4 w-48 rounded bg-gray-200" />
+        </div>
+
+        <div className="h-10 w-36 rounded-lg bg-gray-200" />
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {[1, 2, 3, 4].map((item) => (
+          <div
+            key={item}
+            className="rounded-xl border bg-white p-5 shadow-sm"
+          >
+            <div className="h-4 w-24 rounded bg-gray-200" />
+
+            <div className="mt-4 h-9 w-16 rounded bg-gray-200" />
+          </div>
+        ))}
+      </div>
+
+      {/* Overview Sections */}
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+
+        {/* Status Overview Skeleton */}
+        <section className="rounded-xl border bg-white shadow-sm">
+          <div className="border-b px-5 py-4 space-y-2">
+            <div className="h-5 w-48 rounded bg-gray-200" />
+            <div className="h-4 w-64 rounded bg-gray-200" />
+          </div>
+
+          <div className="space-y-5 p-5">
+            {[1, 2, 3, 4, 5].map((item) => (
+              <div key={item}>
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="h-4 w-20 rounded bg-gray-200" />
+                  <div className="h-4 w-8 rounded bg-gray-200" />
+                </div>
+
+                <div className="h-2 w-full rounded-full bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+        {/* Priority Overview Skeleton */}
+        <section className="rounded-xl border bg-white shadow-sm">
+          <div className="border-b px-5 py-4 space-y-2">
+            <div className="h-5 w-40 rounded bg-gray-200" />
+            <div className="h-4 w-56 rounded bg-gray-200" />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4 p-5">
+            {[1, 2, 3, 4].map((item) => (
+              <div
+                key={item}
+                className="rounded-lg border p-4"
+              >
+                <div className="h-4 w-20 rounded bg-gray-200" />
+
+                <div className="mt-3 h-7 w-12 rounded bg-gray-200" />
+
+                <div className="mt-4 h-2 w-full rounded bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        </section>
+
+      </div>
+
+      {/* Agent Workload / Generic Section */}
+      <section className="rounded-xl border bg-white shadow-sm">
+        <div className="border-b px-5 py-4 space-y-2">
+          <div className="h-5 w-40 rounded bg-gray-200" />
+          <div className="h-4 w-64 rounded bg-gray-200" />
+        </div>
+
+        <div className="p-5">
+          <div className="space-y-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="flex items-center justify-between"
+              >
+                <div className="space-y-2">
+                  <div className="h-4 w-28 rounded bg-gray-200" />
+                  <div className="h-3 w-40 rounded bg-gray-200" />
+                </div>
+
+                <div className="h-6 w-16 rounded bg-gray-200" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Recent Tickets */}
+      <section className="rounded-xl border bg-white shadow-sm">
+        <div className="border-b px-5 py-4 space-y-2">
+          <div className="h-5 w-36 rounded bg-gray-200" />
+          <div className="h-4 w-52 rounded bg-gray-200" />
+        </div>
+
+        <div className="divide-y">
+          {[1, 2, 3, 4].map((item) => (
+            <div
+              key={item}
+              className="px-5 py-4"
+            >
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                <div className="space-y-2">
+                  <div className="h-4 w-24 rounded bg-gray-200" />
+                  <div className="h-4 w-64 rounded bg-gray-200" />
+                  <div className="h-3 w-20 rounded bg-gray-200" />
+                </div>
+
+                <div className="flex gap-2">
+                  <div className="h-6 w-20 rounded-full bg-gray-200" />
+                  <div className="h-6 w-16 rounded-full bg-gray-200" />
+                </div>
+
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+    </div>
+  );
+}
+
+/* ============================================================
+   Dashboard
+============================================================ */
+
 function Dashboard() {
   const { user } = useAuth();
 
@@ -67,13 +214,17 @@ function Dashboard() {
     fetchDashboard();
   }, []);
 
+  /* ============================================================
+     Skeleton Loading
+  ============================================================ */
+
   if (loading) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-gray-500">Loading dashboard...</p>
-      </div>
-    );
+    return <DashboardSkeleton />;
   }
+
+  /* ============================================================
+     Error
+  ============================================================ */
 
   if (error) {
     return (
@@ -204,22 +355,22 @@ function Dashboard() {
 
       {/* Summary Cards */}
       {!isAgent && (
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {summaryCards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-xl border bg-white p-5 shadow-sm"
-          >
-            <p className="text-sm font-medium text-gray-500">
-              {card.label}
-            </p>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {summaryCards.map((card) => (
+            <div
+              key={card.label}
+              className="rounded-xl border bg-white p-5 shadow-sm"
+            >
+              <p className="text-sm font-medium text-gray-500">
+                {card.label}
+              </p>
 
-            <p className="mt-2 text-3xl font-bold text-gray-900">
-              {card.value}
-            </p>
-          </div>
-        ))}
-          </div>
+              <p className="mt-2 text-3xl font-bold text-gray-900">
+                {card.value}
+              </p>
+            </div>
+          ))}
+        </div>
       )}
 
       {/* Agent Workload */}
@@ -238,6 +389,7 @@ function Dashboard() {
           <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
             <div className="rounded-lg bg-blue-50 p-4">
               <p className="text-sm text-gray-500">Open</p>
+
               <p className="mt-1 text-2xl font-bold text-gray-900">
                 {myWorkload.open}
               </p>
@@ -247,6 +399,7 @@ function Dashboard() {
               <p className="text-sm text-gray-500">
                 In Progress
               </p>
+
               <p className="mt-1 text-2xl font-bold text-gray-900">
                 {myWorkload.inProgress}
               </p>
@@ -256,6 +409,7 @@ function Dashboard() {
               <p className="text-sm text-gray-500">
                 On Hold
               </p>
+
               <p className="mt-1 text-2xl font-bold text-gray-900">
                 {myWorkload.onHold}
               </p>
@@ -265,6 +419,7 @@ function Dashboard() {
               <p className="text-sm text-gray-500">
                 Active
               </p>
+
               <p className="mt-1 text-2xl font-bold text-gray-900">
                 {myWorkload.active}
               </p>
@@ -273,7 +428,7 @@ function Dashboard() {
         </section>
       )}
 
-      {/* My Assigned Tickets - Agent/Admin */}
+      {/* My Assigned Tickets - Agent */}
       {isAgent && (
         <section className="rounded-xl border bg-white shadow-sm">
           <div className="border-b px-5 py-4">
@@ -433,6 +588,7 @@ function Dashboard() {
               })}
             </div>
           </section>
+
         </div>
       )}
 
@@ -457,15 +613,19 @@ function Dashboard() {
                     <th className="px-5 py-3 font-medium">
                       Agent
                     </th>
+
                     <th className="px-5 py-3 font-medium">
                       Open
                     </th>
+
                     <th className="px-5 py-3 font-medium">
                       In Progress
                     </th>
+
                     <th className="px-5 py-3 font-medium">
                       On Hold
                     </th>
+
                     <th className="px-5 py-3 font-medium">
                       Active
                     </th>
@@ -507,70 +667,6 @@ function Dashboard() {
         </section>
       )}
 
-      {/* Status Overview - Agent */}
-      {/* {isAgent && (
-        <section className="rounded-xl border bg-white shadow-sm">
-          <div className="border-b px-5 py-4">
-            <h2 className="font-semibold text-gray-900">
-              Ticket Status Overview
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500">
-              Current ticket distribution
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-5">
-            {statusOverview.map((item) => (
-              <div
-                key={item.key}
-                className="rounded-lg border p-4"
-              >
-                <p className="text-sm text-gray-500">
-                  {item.label}
-                </p>
-
-                <p className="mt-1 text-2xl font-bold text-gray-900">
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )} */}
-
-      {/* Priority Overview - Agent */}
-      {/* {isAgent && (
-        <section className="rounded-xl border bg-white shadow-sm">
-          <div className="border-b px-5 py-4">
-            <h2 className="font-semibold text-gray-900">
-              Priority Overview
-            </h2>
-
-            <p className="mt-1 text-sm text-gray-500">
-              Current priority distribution
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 p-5 sm:grid-cols-4">
-            {priorityOverviewItems.map((item) => (
-              <div
-                key={item.label}
-                className="rounded-lg border p-4"
-              >
-                <p className="text-sm text-gray-500">
-                  {item.label}
-                </p>
-
-                <p className="mt-1 text-2xl font-bold text-gray-900">
-                  {item.value}
-                </p>
-              </div>
-            ))}
-          </div>
-        </section>
-      )} */}
-
       {/* Recent Tickets */}
       <section className="rounded-xl border bg-white shadow-sm">
         <div className="border-b px-5 py-4">
@@ -592,6 +688,7 @@ function Dashboard() {
                 className="block px-5 py-4 hover:bg-gray-50"
               >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-gray-900">
                       {ticket.ticketNumber}
@@ -628,6 +725,7 @@ function Dashboard() {
                       {ticket.priority}
                     </span>
                   </div>
+
                 </div>
               </Link>
             ))}
@@ -638,6 +736,7 @@ function Dashboard() {
           </div>
         )}
       </section>
+
     </div>
   );
 }
