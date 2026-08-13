@@ -1,26 +1,65 @@
-const nodemailer = require('nodemailer');
+const sendEmail = async ({
+  to,
+  toName,
+  subject,
+  textContent,
+  htmlContent,
+}) => {
+  const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+    method: 'POST',
+    headers: {
+      accept: 'application/json',
+      'api-key': process.env.BREVO_API_KEY,
+      'content-type': 'application/json',
+    },
+    body: JSON.stringify({
+      sender: {
+        name: process.env.MAIL_FROM_NAME || 'Helpdesk',
+        email: process.env.MAIL_FROM,
+      },
+      to: [
+        {
+          email: to,
+          name: toName,
+        },
+      ],
+      subject,
+      textContent,
+      htmlContent,
+    }),
+  });
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT),
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASSWORD,
-  },
-});
+  if (!response.ok) {
+    let errorMessage = 'Failed to send email';
+
+    try {
+      const errorData = await response.json();
+      errorMessage =
+        errorData.message ||
+        errorData.code ||
+        errorMessage;
+    } catch {
+      // Keep the default error message if Brevo doesn't return JSON.
+    }
+
+    throw new Error(errorMessage);
+  }
+
+  return response.json();
+};
+
 
 const sendPasswordResetEmail = async ({
   to,
   name,
   resetUrl,
 }) => {
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM,
+  return sendEmail({
     to,
+    toName: name,
     subject: 'Reset your Helpdesk password',
 
-    text: `
+    textContent: `
 Hi ${name},
 
 We received a request to reset your Helpdesk password.
@@ -37,7 +76,7 @@ Regards,
 Helpdesk Team
 `.trim(),
 
-    html: `
+    htmlContent: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #1f2937;">
         <h2>Reset your Helpdesk password</h2>
 
@@ -84,18 +123,19 @@ Helpdesk Team
   });
 };
 
+
 const sendStaffInvitationEmail = async ({
   to,
   name,
   role,
   resetUrl,
 }) => {
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM,
+  return sendEmail({
     to,
+    toName: name,
     subject: 'You have been invited to Helpdesk',
 
-    text: `
+    textContent: `
 Hi ${name},
 
 An administrator has created a ${role} account for you in the Helpdesk system.
@@ -112,7 +152,7 @@ Regards,
 Helpdesk Team
 `.trim(),
 
-    html: `
+    htmlContent: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #1f2937;">
 
         <h2>Welcome to Helpdesk</h2>
@@ -164,15 +204,16 @@ Helpdesk Team
   });
 };
 
+
 const sendWelcomeEmail = async ({ to, name }) => {
   const loginUrl = `${process.env.FRONTEND_URL}/login`;
 
-  await transporter.sendMail({
-    from: process.env.MAIL_FROM,
+  return sendEmail({
     to,
+    toName: name,
     subject: 'Welcome to Helpdesk',
 
-    text: `
+    textContent: `
 Hi ${name},
 
 Welcome to Helpdesk!
@@ -188,8 +229,9 @@ Regards,
 Helpdesk Team
 `.trim(),
 
-    html: `
+    htmlContent: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; color: #1f2937;">
+
         <h2>Welcome to Helpdesk</h2>
 
         <p>Hi ${name},</p>
@@ -222,10 +264,12 @@ Helpdesk Team
           Regards,<br />
           Helpdesk Team
         </p>
+
       </div>
     `,
   });
 };
+
 
 module.exports = {
   sendPasswordResetEmail,
