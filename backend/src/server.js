@@ -9,7 +9,7 @@ async function start() {
     await sequelize.authenticate();
     console.log('Database connection established.');
 
-    app.listen(PORT, () => {
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Helpdesk API listening on port ${PORT}`);
     });
   } catch (err) {
