@@ -37,7 +37,7 @@ triage, assign, and resolve them.
   outside development.
 - **Security:** helmet for HTTP headers, CORS locked to the configured client
   origin, rate limiting on auth endpoints, bcrypt-hashed passwords, JWT
-  short-lived access tokens with refresh rotation.
+  short-lived access tokens with refresh tokens.
 
 ## Project structure
 

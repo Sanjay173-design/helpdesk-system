@@ -18,8 +18,7 @@ router.post(
   [
     body('name').trim().isLength({ min: 2, max: 120 }),
     body('email').isEmail().normalizeEmail(),
-    body('password').isLength({ min: 8 }),
-    body('role').isIn(['customer', 'agent', 'admin']),
+    body('role').isIn(['agent', 'admin']),
   ],
   validate,
   userController.createUser

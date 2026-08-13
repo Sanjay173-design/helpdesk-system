@@ -52,4 +52,53 @@ router.post(
 
 router.get('/me', authenticate, authController.me);
 
+router.patch(
+  '/me',
+  authenticate,
+  [
+    body('name')
+      .optional()
+      .trim()
+      .isLength({ min: 2, max: 120 })
+      .withMessage('Name must be between 2 and 120 characters'),
+  ],
+  validate,
+  authController.updateProfile
+);
+
+router.post(
+  '/forgot-password',
+  authLimiter,
+  [
+    body('email')
+      .isEmail()
+      .normalizeEmail()
+      .withMessage('Valid email is required'),
+  ],
+  validate,
+  authController.forgotPassword
+);
+
+router.post(
+  '/reset-password',
+  authLimiter,
+  [
+    body('token')
+      .notEmpty()
+      .withMessage('Reset token is required'),
+
+    body('newPassword')
+      .isLength({ min: 8 })
+      .withMessage('Password must be at least 8 characters')
+      .matches(/\d/)
+      .withMessage('Password must contain a number'),
+
+    body('confirmPassword')
+      .notEmpty()
+      .withMessage('Password confirmation is required'),
+  ],
+  validate,
+  authController.resetPassword
+);
+
 module.exports = router;

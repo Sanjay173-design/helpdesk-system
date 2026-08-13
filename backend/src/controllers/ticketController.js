@@ -42,11 +42,19 @@ const listTickets = asyncHandler(async (req, res) => {
   if (req.query.status) where.status = req.query.status;
   if (req.query.priority) where.priority = req.query.priority;
   if (req.query.category) where.category = req.query.category;
-  if (req.query.assignedTo && STAFF_ROLES.includes(req.user.role)) {
-    where.assignedTo = req.query.assignedTo === 'unassigned'
-      ? null
-      : req.query.assignedTo;
+  if (req.query.assignedTo) {
+  if (STAFF_ROLES.includes(req.user.role)) {
+    where.assignedTo =
+      req.query.assignedTo === 'unassigned'
+        ? null
+        : req.query.assignedTo;
+  } else if (
+    req.user.role === 'customer' &&
+    req.query.assignedTo === 'unassigned'
+  ) {
+    where.assignedTo = null;
   }
+ }
   if (req.query.search) {
     const term = `%${req.query.search}%`;
     where[Op.or] = [
@@ -93,8 +101,16 @@ const getTicket = asyncHandler(async (req, res) => {
       {
         model: TicketComment,
         as: 'comments',
+        where: req.user.role === 'customer'
+          ? { isInternal: false }
+          : undefined,
+        required: false,
         include: [
-          { model: User, as: 'author', attributes: ['id', 'name', 'role'] },
+          {
+            model: User,
+            as: 'author',
+            attributes: ['id', 'name', 'role'],
+          },
         ],
         order: [['createdAt', 'ASC']],
       },
@@ -102,7 +118,11 @@ const getTicket = asyncHandler(async (req, res) => {
         model: TicketStatusHistory,
         as: 'history',
         include: [
-          { model: User, as: 'changer', attributes: ['id', 'name', 'role'] },
+          {
+            model: User,
+            as: 'changer',
+            attributes: ['id', 'name', 'role'],
+          },
         ],
         order: [['createdAt', 'ASC']],
       },
@@ -113,11 +133,6 @@ const getTicket = asyncHandler(async (req, res) => {
 
   if (req.user.role === 'customer' && ticket.createdBy !== req.user.id) {
     throw new AppError('You do not have access to this ticket', 403);
-  }
-
-  // Customers never see internal-only comments
-  if (req.user.role === 'customer') {
-    ticket.comments = ticket.comments.filter((c) => !c.isInternal);
   }
 
   res.json({ success: true, data: ticket });
@@ -192,10 +207,24 @@ const updateTicket = asyncHandler(async (req, res) => {
     if (ticket.status !== 'open') {
       throw new AppError('Only open tickets can be edited by their creator', 400);
     }
-    if (status || assignedTo || priority) {
-      throw new AppError('Only staff can change status, priority, or assignment', 403);
+    if (status !== undefined || assignedTo !== undefined || priority !== undefined || category !== undefined) {
+      throw new AppError('Only staff can change status, priority, assignment, or category', 403);
     }
   }
+
+  // Only active agents can be assigned to tickets
+if (assignedTo !== undefined && assignedTo !== null) {
+  const agent = await User.findOne({
+    where: {
+      id: assignedTo,
+      role: 'agent',
+      isActive: true,
+    },
+  });
+  if (!agent) {
+    throw new AppError('assignedTo must reference an active agent', 400);
+  }
+}
 
   await sequelize.transaction(async (t) => {
     const changes = {};
