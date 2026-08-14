@@ -135,15 +135,3 @@ All routes are prefixed `/api`.
 | GET    | `/users`                    | Admin           | |
 | POST   | `/users`                    | Admin           | Provisions agent/admin accounts |
 | PATCH  | `/users/:id`                 | Admin           | Change role / activate-deactivate |
-
-## Testing scenarios worth trying
-
-- Register as a customer, create a ticket, log in as `agent`, assign it to
-  yourself, change status, add an internal note (log back in as the customer
-  and confirm the internal note is hidden).
-- Open the same ticket in two browser tabs as different agents, update status
-  in one, then try to update in the other with the stale `version` — expect
-  `409`.
-- Try `PATCH /tickets/:id` as the ticket's customer once it's no longer
-  `open` — expect `403`.
-- Hit `/api/auth/login` more than 20 times in 15 minutes — expect `429`.
